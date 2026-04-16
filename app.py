@@ -1687,24 +1687,22 @@ with tab2:
                                 "File Name","")).strip()
                             url2=resolve_url(row2)
                             ck2="px_{}".format(fname2)
-                            if st.session_state.get(
-                                    ck2) is None:
-                                # Try local file first
-                                local=os.path.join(
-                                    DEMO_DIR,fname2)
+                            if st.session_state.get(ck2) is None:
+                                # Try local demo file first
+                                local = os.path.join(DEMO_DIR, fname2)
                                 if os.path.exists(local):
-                                    res=extract_price_from_file(
-                                        local)
-                                    st.session_state[
-                                        ck2]=res
-                                elif (url2 and
-                                      url2.startswith(
-                                          "http")):
-                                    from app import (
-                                        extract_price_from_url
-                                        if False else None)
-                                    pass
-                            prog.progress((ki+1)/n)
+                                    res = extract_price_from_file(local)
+                                    st.session_state[ck2] = res
+                                elif url2 and url2.startswith("http"):
+                                    if REQUESTS_OK:
+                                        try:
+                                            r   = requests.get(url2, timeout=20)
+                                            ext2 = url2.split("?")[0].rsplit(".",1)[-1].lower()
+                                            res  = extract_price_from_bytes(r.content, ext2)
+                                            st.session_state[ck2] = res
+                                        except Exception:
+                                            pass
+                            prog.progress((ki + 1) / n)
                         prog.empty()
                         st.rerun()
 
